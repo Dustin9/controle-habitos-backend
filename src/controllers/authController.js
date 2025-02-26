@@ -2,6 +2,7 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+
 //Registro
 exports.register = async (req, res) => {
 const { email, password } = req.body;
@@ -34,12 +35,16 @@ exports.login = async (req, res) => {
       console.log(req.body);
       // Busca o usuário e garante que o campo "password" seja retornado
       const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
-      console.log(user)
-      // Verifica se o usuário existe
+      const users = await User.find();
+      const validasenha = bcrypt.compare(password, user.password);
       if (!user) {
         return res.status(401).json({ message: "Usuario não existente" });
       }
-      
+      if (!validasenha) {
+        return res.status(401).json({ message: "Senha invalida" });
+      }
+      console.log(users)
+      console.log(user)
       // Verifica se a conta está bloqueada (método definido no schema)
       if (user.isLocked && user.isLocked()) {
         const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 60000);
