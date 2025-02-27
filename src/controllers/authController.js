@@ -5,37 +5,50 @@ const bcrypt = require("bcryptjs");
 
 //Registro
 exports.register = async (req, res) => {
-const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
-try {
-    // Verifica se o usuário já existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-    return res.status(400).json({ message: "E-mail já cadastrado" });
-    }
+  try {
+      // Verifica se o e-mail já existe
+      const existingEmail = await User.findOne({ email });
+      if (existingEmail) {
+          return res.status(400).json({ message: "E-mail já cadastrado" });
+      }
 
-    // Cria o usuário
-    const user = await User.create({ email, password });
-    
-    // Gera token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-    });
+      // Verifica se o nome já existe (convertido para minúsculas)
+      if (name) {
+          const existingUser = await User.findOne({ name: name.toLowerCase() });
+          if (existingUser) { 
+              return res.status(400).json({ message: "Nome de usuário já cadastrado" });
+          }
+      }
 
-    res.status(201).json({ token });
-} catch (error) {
-    res.status(500).json({ message: error.message });
-}
+      // Cria o usuário
+      const user = await User.create({ email, password, name });
+      
+      // Gera token JWT
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: process.env.JWT_EXPIRE,
+      });
+
+      res.status(201).json({ token });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
 };
 //Login
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
     try {
       console.log(req.body);
       // Busca o usuário e garante que o campo "password" seja retornado
-      const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
-      const users = await User.find();
+      const user = await User.findOne({
+        $or: [
+            { email: identifier.toLowerCase() },
+            { name: identifier.toLowerCase() }
+        ]
+    }).select('+password');
+      // Verifica se o usuário existe e a senha está correta
       const validasenha = bcrypt.compare(password, user.password);
       if (!user) {
         return res.status(401).json({ message: "Usuario não existente" });
@@ -43,7 +56,6 @@ exports.login = async (req, res) => {
       if (!validasenha) {
         return res.status(401).json({ message: "Senha invalida" });
       }
-      console.log(users)
       console.log(user)
       // Verifica se a conta está bloqueada (método definido no schema)
       if (user.isLocked && user.isLocked()) {
@@ -72,7 +84,8 @@ exports.login = async (req, res) => {
         user: {
           id: user._id,
           email: user.email,
-          // adicione outros campos que julgar necessários
+          name: user.name
+          // Adicione mais campos se necessário
         },
       });
   

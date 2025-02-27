@@ -8,6 +8,13 @@ email: {
     unique: true,
     lowercase: true,
 },
+name:{
+    type: String,
+    required: true, 
+    lowercase: true,
+    unique: true,
+    sparse: true, // Permite valores nulos
+}, 
 password: {
     type: String,
     required: true,
@@ -20,9 +27,11 @@ loginAttempts: {
 lockUntil: {
     type: Date,
 },
+
 resetPasswordToken: String,
 resetPasswordExpire: Date,
-}, { timestamps: true });
+}, 
+{ timestamps: true });
 
 // Hash da senha antes de salvar
 userSchema.pre("save", async function (next) {
