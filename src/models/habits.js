@@ -5,15 +5,23 @@ name: {
     type: String,
     required: true,
 },
+description: {
+    type: String,
+},
 category: {
     type: String,
-    enum: ['Saúde', 'Trabalho', 'Lazer'],
-    default: 'Saúde',
+    enum: ['Saúde', 'Trabalho', 'Lazer, Estudo', 'Outros'],
+    default: 'Outros',
 },
 frequency: {
     type: String,
-    enum: ['Diário', 'Semanal'],
+    enum: ['Diário', 'Semanal', 'Todo dia'],
     default: 'Diário',
+},
+meta: {
+    type: Number,
+    min: 1,
+    description: 'Meta de vezes que o hábito deve ser completado'
 },
 progress: [
     {

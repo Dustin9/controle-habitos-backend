@@ -18,6 +18,63 @@
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
             }
+        },
+        "schemas": {
+            "Habit": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Nome do hábito"
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": ["Saúde", "Trabalho", "Lazer", "Estudo", "Outros"],
+                        "default": "Outros",
+                        "description": "Categoria do hábito"
+                    },
+                    "frequency": {
+                        "type": "string",
+                        "enum": ["Diário", "Semanal", "Todo dia"],
+                        "default": "Diário",
+                        "description": "Frequência do hábito"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/api/habits": {
+            "post": {
+                "summary": "Criar novo hábito",
+                "tags": ["Hábitos"],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Habit"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Hábito criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Habit"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro na requisição"
+                    }
+                }
+            }
         }
     },
     "security": [
