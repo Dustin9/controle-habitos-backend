@@ -1,6 +1,5 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
 
 const options = {
     definition: {
@@ -12,7 +11,7 @@ const options = {
         },
         servers: [
             {
-                url: 'http://localhost:5000', // Altere para sua URL em produção
+                url: `http://localhost:${process.env.PORT}`, 
                 description: 'Servidor Local',
             },
         ],
@@ -27,13 +26,20 @@ const options = {
         },
         security: [{ bearerAuth: [] }],
     },
-    apis: ['./src/routes/*.js', './src/models/*.js', '.src/controllers/*.js'], // Caminho dos arquivos com as anotações
+    apis: ['./src/routes/*.js', './src/models/*.js', './src/controllers/*.js'], // Fixed path
 };
 
 const specs = swaggerJsdoc(options);
 
 const swaggerConfig = (app) => {
-    app.use('/swagger', swaggerUi.serve, swaggerUi.setup(specs));
+    // Serve Swagger UI at /api-docs
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+    
+    // Serve OpenAPI spec at /api-docs.json
+    app.get('/api-docs.json', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(specs);
+    });
 };
 
 module.exports = swaggerConfig;
